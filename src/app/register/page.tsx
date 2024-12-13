@@ -10,11 +10,15 @@ const RegisterPage = () => {
 
   const handleRegister = async (email: string, password: string) => {
     setLoading(true);
-    const res = await fetch("http://localhost:3000/users/register", {
-      method: "POST",
-      body: JSON.stringify({ email, password }),
-      headers: { "Content-Type": "application/json" },
-    });
+    const res = await fetch(
+      `${process.env.NEXT_PUBLIC_API_BASE_URL}/auth/register`,
+      {
+        method: "POST",
+        body: JSON.stringify({ email, password }),
+        headers: { "Content-Type": "application/json" },
+      }
+    );
+    console.log(res);
 
     if (res.ok) {
       router.push("/login");

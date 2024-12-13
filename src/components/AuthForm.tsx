@@ -15,11 +15,11 @@ const AuthForm: FC<AuthFormProps> = ({ onSubmit, loading }) => {
   };
 
   return (
-    <form onSubmit={handleSubmit}>
+    <form onSubmit={handleSubmit} className="flex flex-col space-y-4">
       <input
         type="email"
         placeholder="Email"
-        className="mb-4 p-2 border"
+        className="p-2 border"
         value={email}
         onChange={e => setEmail(e.target.value)}
         required
@@ -27,7 +27,7 @@ const AuthForm: FC<AuthFormProps> = ({ onSubmit, loading }) => {
       <input
         type="password"
         placeholder="Password"
-        className="mb-4 p-2 border"
+        className="p-2 border"
         value={password}
         onChange={e => setPassword(e.target.value)}
         required

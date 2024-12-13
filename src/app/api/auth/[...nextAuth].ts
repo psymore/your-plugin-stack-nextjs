@@ -15,7 +15,7 @@ export default NextAuth({
         password: { label: "Password", type: "password" },
       },
       async authorize(credentials) {
-        const res = await fetch("http://localhost:3000/users/login", {
+        const res = await fetch("http://localhost:3000/auth/login", {
           method: "POST",
           body: JSON.stringify({
             email: credentials?.email,

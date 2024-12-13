@@ -4,6 +4,9 @@ const nextConfig = {
   images: {
     domains: ["localhost"], // If you need to serve images from your backend
   },
+  devIndicators: {
+    buildActivity: false, // Disable the static indicator
+  },
 };
 
 module.exports = nextConfig;

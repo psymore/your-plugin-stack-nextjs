@@ -1,38 +1,50 @@
+// src/pages/login.tsx
 "use client";
-import { signIn } from "next-auth/react";
+
 import { useState } from "react";
 import { useRouter } from "next/navigation";
+import { fetcher } from "../../utils/api";
 import AuthForm from "../../components/AuthForm";
 
-const LoginPage = () => {
+const Login = () => {
   const [loading, setLoading] = useState(false);
+
+  const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
   const router = useRouter();
 
   const handleLogin = async (email: string, password: string) => {
-    setLoading(true);
-    const res = await signIn("credentials", {
-      email,
-      password,
-      redirect: false,
-    });
+    try {
+      // Use the fetcher function to call the Next.js API route
+      const res = await fetcher("/api/auth/login", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({ email, password }),
+      });
 
-    if (res?.ok) {
-      router.push("/dashboard");
-    } else {
-      console.error("Login failed");
+      if (res) {
+        router.push("/protected");
+      } else {
+        alert("Login failed");
+      }
+    } catch (error: any) {
+      alert(error.message || "Login failed");
     }
-    setLoading(false);
   };
 
   return (
     <div className="flex h-screen">
       <div className="w-1/2 p-10 flex flex-col justify-center bg-gray-100">
-        <h1 className="text-3xl mb-6">Welcome to Your Plugin Stack</h1>
-        <button
+        <h1 className="text-3xl mb-6 text-blue-500 drop-shadow-lg">
+          Login to Your Plugin Stack
+        </h1>
+        {/* <button
           className="bg-blue-500 text-white py-2 px-4 rounded mb-4"
           onClick={() => signIn("google")}>
           Sign in with Google
-        </button>
+        </button> */}
         <AuthForm onSubmit={handleLogin} loading={loading} />
       </div>
       <div
@@ -47,4 +59,4 @@ const LoginPage = () => {
   );
 };
 
-export default LoginPage;
+export default Login;
