@@ -9,14 +9,12 @@ import AuthForm from "../../components/AuthForm";
 const Login = () => {
   const [loading, setLoading] = useState(false);
 
-  const [email, setEmail] = useState("");
-  const [password, setPassword] = useState("");
   const router = useRouter();
 
   const handleLogin = async (email: string, password: string) => {
     try {
       // Use the fetcher function to call the Next.js API route
-      const res = await fetcher("/api/auth/login", {
+      const res = await fetcher("/auth/login", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
@@ -46,6 +44,14 @@ const Login = () => {
           Sign in with Google
         </button> */}
         <AuthForm onSubmit={handleLogin} loading={loading} />
+        <div className="flex justify-center items-center mt-4">
+          <p className="text-md text-gray-500">
+            Already have an account?{" "}
+            <a href="/register" className="text-blue-700 hover:underline">
+              Register
+            </a>
+          </p>
+        </div>
       </div>
       <div
         className="w-1/2 bg-cover bg-center"

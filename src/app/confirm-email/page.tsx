@@ -1,24 +1,32 @@
+"use client";
 // src/pages/confirm-email.tsx
 import { useEffect, useState } from "react";
-import { useRouter } from "next/router";
+import { useRouter, useSearchParams } from "next/navigation";
 
-const VerifyEmailPage = () => {
+const ConfirmEmailPage = () => {
   const [message, setMessage] = useState("");
   const [error, setError] = useState("");
   const router = useRouter();
-  const { token } = router.query; // token from URL
+  const searchParams = useSearchParams();
+  const token = searchParams ? searchParams.get("token") : null; // token from URL
 
-  const verifyEmail = async () => {
+  console.log(token);
+
+  const confirmEmail = async () => {
     try {
-      const response = await fetch("/api/auth/verify-email", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ token }),
-      });
+      const response = await fetch(
+        `${process.env.NEXT_PUBLIC_BACKEND_API_URL}/auth/confirm-email?token=${token}`,
+        {
+          method: "GET",
+          headers: { "Content-Type": "application/json" },
+        }
+      );
 
       const data = await response.json();
       if (response.ok) {
         setMessage("Email confirmed successfully!");
+        // Navigate to the login page after successful confirmation
+        router.push("/login");
       } else {
         setError(data.message || "Failed to confirm email.");
       }
@@ -29,7 +37,7 @@ const VerifyEmailPage = () => {
 
   useEffect(() => {
     if (token) {
-      verifyEmail();
+      confirmEmail();
     }
   }, [token]);
 
@@ -41,4 +49,4 @@ const VerifyEmailPage = () => {
   );
 };
 
-export default VerifyEmailPage;
+export default ConfirmEmailPage;

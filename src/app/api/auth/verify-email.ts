@@ -11,7 +11,7 @@ export default async function handler(
 
     try {
       // Send request to backend to verify email using the fetcher function
-      const result = await fetcher("/auth/verify-email", {
+      const result = await fetcher("/auth/confirm-email", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ token }),

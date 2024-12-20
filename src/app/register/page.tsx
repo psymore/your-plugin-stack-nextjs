@@ -10,15 +10,15 @@ const RegisterPage = () => {
 
   const handleRegister = async (email: string, password: string) => {
     setLoading(true);
+
     const res = await fetch(
-      `${process.env.NEXT_PUBLIC_API_BASE_URL}/auth/register`,
+      `${process.env.NEXT_PUBLIC_BACKEND_API_URL}/auth/register`,
       {
         method: "POST",
         body: JSON.stringify({ email, password }),
         headers: { "Content-Type": "application/json" },
       }
     );
-    console.log(res);
 
     if (res.ok) {
       router.push("/login");
@@ -35,6 +35,14 @@ const RegisterPage = () => {
           Register to Your Plugin Stack
         </h1>
         <AuthForm onSubmit={handleRegister} loading={loading} />
+        <div className="flex justify-center items-center mt-4">
+          <p className="text-md text-gray-500">
+            Already have an account?{" "}
+            <a href="/login" className="text-blue-700 hover:underline">
+              Login
+            </a>
+          </p>
+        </div>
       </div>
       <div
         className="w-1/2 bg-cover bg-center"
