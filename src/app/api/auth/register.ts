@@ -19,12 +19,9 @@ export default async function handler(
 
       res.status(200).json(result);
     } catch (error: any) {
-      // Handle different types of errors
+      const statusCode = error?.status || 500;
       res
-        .status(401)
-        .json({ message: error.message || "Login failed" });
-      res
-        .status(500)
+        .status(statusCode)
         .json({ message: error.message || "Internal server error" });
     }
   } else {

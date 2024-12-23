@@ -23,7 +23,7 @@ const Login = () => {
       });
 
       if (res) {
-        router.push("/protected");
+        router.push("/dashboard");
       } else {
         alert("Login failed");
       }

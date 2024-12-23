@@ -1,14 +1,25 @@
-// src/app/api/auth/logout.ts
-import { getSession } from "next-auth/react";
 import { NextApiRequest, NextApiResponse } from "next";
+import { fetcher } from "../../../utils/api"; // Assuming fetcher is used for backend requests
 
 export default async (req: NextApiRequest, res: NextApiResponse) => {
-  const session = await getSession({ req });
+  if (req.method === "GET") {
+    console.log("req.headers.authorization", req.headers.authorization);
+    try {
+      // Pass the Authorization header along with the token
+      const result = await fetcher("/auth/logout", {
+        method: "GET",
+        headers: {
+          Authorization: req.headers.authorization || "", // Forward the Authorization header
+        },
+        credentials: "include", // Include cookies
+      });
 
-  if (session) {
-    // Destroy session here
-    res.redirect("/");
+      res.status(200).json(result); // Respond with the result from the backend
+    } catch (error: any) {
+      res.status(500).json({ message: "Logout failed" });
+    }
   } else {
-    res.status(401).json({ message: "Not authenticated" });
+    res.setHeader("Allow", ["GET"]);
+    res.status(405).end(`Method ${req.method} Not Allowed`);
   }
 };
