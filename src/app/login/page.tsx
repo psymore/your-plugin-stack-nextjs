@@ -1,15 +1,16 @@
-// src/pages/login.tsx
+// src/app/login/page.tsx
 "use client";
 
 import { useState } from "react";
 import { useRouter } from "next/navigation";
+import { useSearchParams } from "next/navigation"; // Import useSearchParams
 import { fetcher } from "../../utils/api";
 import AuthForm from "../../components/AuthForm";
 
 const Login = () => {
   const [loading, setLoading] = useState(false);
-
   const router = useRouter();
+  const searchParams = useSearchParams(); // Use this to access query parameters
 
   const handleLogin = async (email: string, password: string) => {
     try {
@@ -23,7 +24,8 @@ const Login = () => {
       });
 
       if (res) {
-        router.push("/dashboard");
+        const from = searchParams.get("from"); // Get 'from' from the query string
+        router.push(from || "/dashboard"); // Redirect to 'from' or default to '/dashboard'
       } else {
         alert("Login failed");
       }
@@ -38,11 +40,6 @@ const Login = () => {
         <h1 className="text-3xl mb-6 text-blue-500 drop-shadow-lg">
           Login to Your Plugin Stack
         </h1>
-        {/* <button
-          className="bg-blue-500 text-white py-2 px-4 rounded mb-4"
-          onClick={() => signIn("google")}>
-          Sign in with Google
-        </button> */}
         <AuthForm onSubmit={handleLogin} loading={loading} />
         <div className="flex justify-center items-center mt-4">
           <p className="text-md text-gray-500">
