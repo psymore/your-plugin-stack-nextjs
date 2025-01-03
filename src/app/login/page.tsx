@@ -1,7 +1,7 @@
 // src/app/login/page.tsx
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import { useSearchParams } from "next/navigation"; // Import useSearchParams
 import { fetcher } from "../../utils/api";
@@ -11,9 +11,20 @@ const Login = () => {
   const [loading, setLoading] = useState(false);
   const router = useRouter();
   const searchParams = useSearchParams(); // Use this to access query parameters
+  const [isLoggedIn, setIsLoggedIn] = useState(false);
+
+  useEffect(() => {
+    // Check if there's a valid token (or session) to determine if the user is already logged in
+    const token = localStorage.getItem("authToken"); // Or check cookies/session storage if you're using that
+    if (token) {
+      setIsLoggedIn(true);
+      router.push("/dashboard"); // Redirect to dashboard if already logged in
+    }
+  }, [router]);
 
   const handleLogin = async (email: string, password: string) => {
     try {
+      setLoading(true);
       // Use the fetcher function to call the Next.js API route
       const res = await fetcher("/auth/login", {
         method: "POST",
@@ -23,7 +34,8 @@ const Login = () => {
         body: JSON.stringify({ email, password }),
       });
 
-      if (res) {
+      if (res && res.token) {
+        localStorage.setItem("authToken", res.token); // Store the token (or handle with cookies)
         const from = searchParams.get("from"); // Get 'from' from the query string
         router.push(from || "/dashboard"); // Redirect to 'from' or default to '/dashboard'
       } else {
@@ -31,6 +43,8 @@ const Login = () => {
       }
     } catch (error: any) {
       alert(error.message || "Login failed");
+    } finally {
+      setLoading(false);
     }
   };
 

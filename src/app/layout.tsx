@@ -1,7 +1,9 @@
 import type { Metadata } from "next";
 import localFont from "next/font/local";
 import "../styles/globals.css";
+import ClientProvider from "./ClientProvider"; // Import the client-side component
 
+// Font configuration
 const geistSans = localFont({
   src: "./fonts/GeistVF.woff",
   variable: "--font-geist-sans",
@@ -37,7 +39,9 @@ export default function RootLayout({
           </header>
 
           {/* Main content */}
-          <main className="flex-grow container mx-auto px-4">{children}</main>
+          <ClientProvider>
+            <main className="flex-grow container mx-auto px-4">{children}</main>
+          </ClientProvider>
 
           {/* Optional Footer */}
           <footer className="bg-gray-800 text-white py-4 mt-auto">

@@ -17,7 +17,12 @@ export default async function handler(
         body: JSON.stringify({ email, password }),
       });
 
-      res.status(200).json(result);
+      if (result.token) {
+        // Send the token back to the frontend for storage in cookies/localStorage
+        res.status(200).json({ token: result.token });
+      } else {
+        res.status(401).json({ message: "Invalid credentials" });
+      }
     } catch (error: any) {
       // Handle different types of errors
       res

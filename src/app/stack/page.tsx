@@ -1,95 +1,127 @@
-// src/app/create-stack/page.tsx
-
-"use client"; // This is needed because we will use client-side form handling
-
-import { useState } from "react";
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
+import { cookies } from "next/headers";
 import { useRouter } from "next/navigation";
+import { useState } from "react";
 
-interface StackForm {
+// Mock authentication function to simulate current user (can be replaced with real auth)
+const getCurrentUserId = async () => {
+  const userCookies = await cookies();
+
+  return userCookies.get("userId");
+};
+
+// Fetch stacks for a specific user
+const fetchStacks = async (userId: string) => {
+  const res = await fetch(
+    `${process.env.NEXT_PUBLIC_API_BASE_URL}/stack?userId=${userId}`
+  );
+  if (!res.ok) throw new Error("Failed to fetch stacks");
+  return res.json();
+};
+
+// Create a new stack mutation
+const createStack = async (stackData: {
   stackName: string;
-  userId: string; // Assuming userId will be passed or selected, if needed
+  userId: string;
+}) => {
+  const res = await fetch(`${process.env.NEXT_PUBLIC_API_BASE_URL}/stack`, {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+    },
+    body: JSON.stringify(stackData),
+  });
+
+  if (!res.ok) throw new Error("Failed to create stack");
+  return res.json();
+};
+
+interface Stack {
+  id: string;
+  name: string;
 }
 
-const CreateStackPage = () => {
-  const [formData, setFormData] = useState<StackForm>({
-    stackName: "",
-    userId: "",
+export const StackList = async ({
+  stacks,
+  userId,
+}: {
+  stacks: Array<Stack>;
+  userId: string;
+}) => {
+  const [stackName, setStackName] = useState("");
+  const router = useRouter();
+  const queryClient = useQueryClient();
+
+  const loggedInUserId = getCurrentUserId(); // This is the current logged-in user's ID
+  const userIdCookie = await loggedInUserId;
+  const isOwner = userIdCookie?.value === userId; // Check if user is visiting their own page
+
+  // Fetch stacks for the user
+  const {
+    data: fetchedStacks,
+    isLoading,
+    error,
+  } = useQuery({
+    queryKey: ["stacks", userId],
+    queryFn: () => fetchStacks(userId),
   });
-  const [loading, setLoading] = useState(false);
-  const [error, setError] = useState<string | null>(null);
-  const [successMessage, setSuccessMessage] = useState<string | null>(null);
 
-  const router = useRouter(); // To navigate after success (optional)
+  // Mutation for creating a stack
+  const mutation = useMutation({
+    mutationFn: (newStack: { stackName: string; userId: string }) =>
+      createStack(newStack),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["stacks", userId] }); // Refetch stacks after creating one
+    },
+  });
 
-  // Handle form input changes
-  const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    setFormData({
-      ...formData,
-      [e.target.name]: e.target.value,
+  // Handle creating a stack
+  const handleCreateStack = async () => {
+    if (!stackName) return;
+    const userId = await loggedInUserId; // Await the promise to get the user ID
+    mutation.mutate({
+      stackName,
+      userId: userId?.value || "", // Ensure userId is a string
     });
+    setStackName(""); // Clear the input after creation
   };
 
-  // Handle form submission
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
-    setLoading(true);
-    setError(null);
-
-    try {
-      const res = await fetch(`${process.env.NEXT_PUBLIC_API_BASE_URL}/stack`, {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({
-          stackInfo: {
-            stackName: formData.stackName,
-          },
-        }),
-      });
-
-      if (!res.ok) {
-        throw new Error("Failed to create the stack.");
-      }
-
-      const data = await res.json();
-      setSuccessMessage("Stack created successfully!");
-
-      // Optional: Navigate to the list of stacks or another page
-      // router.push("/stacks");
-    } catch (error) {
-      setError((error as Error).message || "An unknown error occurred.");
-    } finally {
-      setLoading(false);
-    }
-  };
+  if (isLoading) return <p>Loading...</p>;
+  if (error) return <p>Error loading stacks</p>;
 
   return (
     <div>
-      <h1>Create a New Stack</h1>
+      <h1>{isOwner ? "Your Stacks" : `Stacks of User ${userId}`}</h1>
 
-      {error && <p style={{ color: "red" }}>{error}</p>}
-      {successMessage && <p style={{ color: "green" }}>{successMessage}</p>}
-
-      <form onSubmit={handleSubmit}>
+      {/* Show the Create Stack form only if the logged-in user is the owner of the page */}
+      {isOwner && (
         <div>
-          <label htmlFor="stackName">Stack Name</label>
+          <h2>Create a New Stack</h2>
           <input
             type="text"
-            id="stackName"
-            name="stackName"
-            value={formData.stackName}
-            onChange={handleChange}
-            required
+            value={stackName}
+            onChange={e => setStackName(e.target.value)}
+            placeholder="Stack Name"
           />
+          <button
+            onClick={() => handleCreateStack()}
+            disabled={mutation.status === "pending"}>
+            {mutation.status === "pending" ? "Creating..." : "Create Stack"}
+          </button>
+          {mutation.error && (
+            <p style={{ color: "red" }}>{(mutation.error as Error).message}</p>
+          )}
         </div>
+      )}
 
-        <button type="submit" disabled={loading}>
-          {loading ? "Creating..." : "Create Stack"}
-        </button>
-      </form>
+      {/* List stacks */}
+      <ul>
+        {fetchedStacks.map((stack: any) => (
+          <li key={stack.id}>{stack.name}</li>
+        ))}
+      </ul>
     </div>
   );
 };
 
-export default CreateStackPage;
+export default StackList;
