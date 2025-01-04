@@ -1,11 +1,11 @@
 // src/app/login/page.tsx
 "use client";
 
-import { useState, useEffect } from "react";
-import { useRouter } from "next/navigation";
-import { useSearchParams } from "next/navigation"; // Import useSearchParams
-import { fetcher } from "../../utils/api";
+import Cookies from "js-cookie";
+import { useRouter, useSearchParams } from "next/navigation";
+import { useEffect, useState } from "react";
 import AuthForm from "../../components/AuthForm";
+import { fetcher } from "../../utils/api";
 
 const Login = () => {
   const [loading, setLoading] = useState(false);
@@ -15,7 +15,7 @@ const Login = () => {
 
   useEffect(() => {
     // Check if there's a valid token (or session) to determine if the user is already logged in
-    const token = localStorage.getItem("authToken"); // Or check cookies/session storage if you're using that
+    const token = Cookies.get("auth-token");
     if (token) {
       setIsLoggedIn(true);
       router.push("/dashboard"); // Redirect to dashboard if already logged in
@@ -34,8 +34,9 @@ const Login = () => {
         body: JSON.stringify({ email, password }),
       });
 
-      if (res && res.token) {
-        localStorage.setItem("authToken", res.token); // Store the token (or handle with cookies)
+      if (res) {
+        // Store the token in cookies with an expiration date (optional)
+        Cookies.set("auth-token", res.token, { expires: 1 }); // The token will expire in 1 day
         const from = searchParams.get("from"); // Get 'from' from the query string
         router.push(from || "/dashboard"); // Redirect to 'from' or default to '/dashboard'
       } else {
