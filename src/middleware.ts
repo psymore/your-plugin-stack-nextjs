@@ -18,22 +18,6 @@ export function middleware(req: NextRequest) {
     return NextResponse.redirect(loginUrl);
   }
 
-  if (token) {
-    try {
-      const decodedToken = jwt.verify(
-        token.value,
-        process.env.JWT_SECRET_KEY as string
-      );
-      const { userId } = decodedToken as jwt.JwtPayload & { userId: string };
-
-      // Add userId to the headers for protected routes
-      req.headers.set("user-id", userId);
-    } catch (error) {
-      console.error("Invalid token:", error);
-      return NextResponse.redirect(new URL("/login", req.url));
-    }
-  }
-
   return NextResponse.next();
 }
 

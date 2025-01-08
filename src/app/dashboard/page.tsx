@@ -9,12 +9,13 @@ export default function Dashboard() {
   const handleLogout = async () => {
     try {
       const response = await fetcher("/auth/logout");
+      console.log("Logout response:", response);
 
-      if (response) {
+      if (response.ok) {
         console.log(response);
         router.push("/login");
       } else {
-        alert("Login failed");
+        alert("Logout failed");
       }
     } catch (error) {
       console.error("Logout error:", error);
