@@ -2,7 +2,7 @@ import type { NextRequest } from "next/server";
 import { NextResponse } from "next/server";
 
 const protectedRoutes = ["/dashboard", "/stack"];
-const publicRoutes = ["/content"];
+const publicRoutes = ["/content", "stack-list"];
 
 export function middleware(req: NextRequest) {
   const token = req.cookies.get("auth-token");
@@ -34,5 +34,10 @@ export function middleware(req: NextRequest) {
 }
 
 export const config = {
-  matcher: ["/dashboard/:path*", "/stack/:path*", "/content/:path*"],
+  matcher: [
+    "/dashboard/:path*",
+    "/stack/:path*",
+    "/content/:path*",
+    "/stack-list/:path*",
+  ],
 };
